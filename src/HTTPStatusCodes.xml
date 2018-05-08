@@ -1,0 +1,2857 @@
+<entityStoreData xmlns="http://www.vordel.com/2005/06/24/entityStore">
+<metaInfo flags="138">
+	<exportRoots>
+		<key type='CircuitContainer'>
+			<id field='name' value='HTTP Status Codes'/>
+			<key type='FilterCircuit'>
+				<id field='name' value='Status Code Tester'/>
+			</key>
+		</key>
+		<key type='CircuitContainer'>
+			<id field='name' value='HTTP Status Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='1xx Codes'/>
+			</key>
+		</key>
+		<key type='CircuitContainer'>
+			<id field='name' value='HTTP Status Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='3xx Codes'/>
+			</key>
+		</key>
+		<key type='CircuitContainer'>
+			<id field='name' value='HTTP Status Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='4xx Codes'/>
+			</key>
+		</key>
+		<key type='CircuitContainer'>
+			<id field='name' value='HTTP Status Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx Codes'/>
+			</key>
+		</key>
+		<key type='ESConfiguration'>
+			<id field='name' value='Entity Store Configuration'/>
+		</key>
+		<key type='CircuitContainer'>
+			<id field='name' value='HTTP Status Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='5xx Codes'/>
+			</key>
+		</key>
+	</exportRoots>
+	<typeVersions>
+		<type name="AddHTTPHeaderFilter" version="5"/>
+		<type name="AttributeCompare" version="1"/>
+		<type name="ChangeMessageFilter" version="0"/>
+		<type name="CircuitChainFilter" version="1"/>
+		<type name="CircuitContainer" version="1"/>
+		<type name="CircuitReference" version="2"/>
+		<type name="CompareAttributeFilter" version="0"/>
+		<type name="ConversionFilter" version="0"/>
+		<type name="ESConfiguration" version="21"/>
+		<type name="Entity" version="0"/>
+		<type name="Filter" version="5"/>
+		<type name="FilterCircuit" version="4"/>
+		<type name="Reflector" version="0"/>
+		<type name="RootChild" version="0"/>
+		<type name="SetAttributeFilter" version="0"/>
+		<type name="SetHTTPStatusCode" version="0"/>
+		<type name="SetResponseStatusFilter" version="0"/>
+		<type name="SwitchCircuitReference" version="1"/>
+		<type name="SwitchFilter" version="4"/>
+	</typeVersions>
+	<realizedTypes><![CDATA[
+<entityStoreData>
+<entityType xmlns="http://www.vordel.com/2005/06/24/entityStore" abstract="true" extends="Entity" name="RootChild"/>
+<entityType xmlns="http://www.vordel.com/2005/06/24/entityStore" extends="RootChild" name="ESConfiguration">
+        <constant name="_version" type="integer" value="21"/>
+        <!--
+            Give this singleton a key.
+        -->
+        <field isKey="true" name="name" type="string"/>
+        <!-- 
+            We use this field to verify that the passphrase for the 
+            encryped data is synchronized between the server and client, and
+            between multiple invocations of the client
+        -->
+        <field name="passphraseTest" type="encrypted"/>
+        <field name="version" type="string"/>
+        <!-- The product key should never change for the lifetime of the product -->
+        <field name="productKey" type="string"/>
+        <field cardinality="?" name="gitrev" type="string"/>
+    </entityType>
+<entityType xmlns="http://www.vordel.com/2005/06/24/entityStore" extends="RootChild" name="CircuitContainer">
+    <constant name="_version" type="integer" value="1"/>
+    <componentType cardinality="*" name="FilterCircuit"/>
+    <componentType cardinality="*" name="CircuitContainer"/>
+    <componentType cardinality="*" name="MVProperty"/>
+    <field isKey="true" name="name" type="string"/>
+  </entityType>
+<entityType xmlns="http://www.vordel.com/2005/06/24/entityStore" extends="RootChild" name="FilterCircuit">
+        <constant name="_version" type="integer" value="4"/>
+		<componentType cardinality="*" name="Filter"/>
+		<componentType cardinality="1" name="BoundCircuit"/>
+		<componentType cardinality="*" name="Property"/>
+		<field cardinality="1" name="start" type="@Filter"/>
+		<field cardinality="?" name="fault" type="@Filter"/>
+		<field isKey="true" name="name" type="string"/>
+		<field cardinality="1" default="3" name="logMask" type="integer"/>
+
+		<field cardinality="?" name="description" type="string"/>		
+		<field cardinality="1" name="category" type="@PolicyCategory">
+            <defaultRef>
+                <key type="PolicyCategoryGroup">
+                  <id field="name" value="Policy Categories"/>
+                  <key type="PolicyCategory">
+                      <id field="name" value="miscellaneous"/>
+                  </key>
+                </key>
+            </defaultRef>
+        </field>
+	</entityType>
+<entityType xmlns="http://www.vordel.com/2005/06/24/entityStore" extends="Entity" name="CircuitReference">
+    <constant name="_version" type="integer" value="2"/>
+    <componentType cardinality="*" name="Property"/>
+    <field isKey="true" name="name" type="string"/>
+    <field cardinality="1" name="priority" type="integer"/>
+    <field cardinality="?" name="circuitPK" type="^FilterCircuit"/>
+    <!-- The evaluation of the referenced circuit is conditional. By default evaluation is enabled. -->
+    <field cardinality="1" default="true" name="evaluate" type="boolean"/>
+  </entityType>
+<entityType xmlns="http://www.vordel.com/2005/06/24/entityStore" extends="CircuitReference" name="SwitchCircuitReference">
+		<constant name="_version" type="integer" value="1"/>
+        <!-- See SwitchComparisonOption for valid type ids -->
+		<field default="contains" name="comparatorType" type="string"/>
+        <field default="" name="compareWith" type="string"/>
+	</entityType>
+<entityType xmlns="http://www.vordel.com/2005/06/24/entityStore" abstract="false" extends="Entity" name="AttributeCompare">
+      <constant name="_version" type="integer" value="1"/>
+      <field isKey="true" name="attrName" type="string"/>
+      <field default="CONTAINS" isKey="true" name="matchType" type="string"/>
+      <field isKey="true" name="expression" type="string"/>
+    </entityType>
+<entityType xmlns="http://www.vordel.com/2005/06/24/entityStore" abstract="true" extends="Entity" name="Filter">
+        <constant name="_version" type="integer" value="5"/>
+        <field cardinality="?" name="successNode" type="@Filter"/>
+        <field cardinality="?" name="failureNode" type="@Filter"/>
+        <field isKey="true" name="name" type="string"/>
+        <field cardinality="1" default="2" name="logMask" type="integer"/>
+        <field cardinality="1" default="Filter aborted due to exception" name="logFatal" type="string"/>
+        <field cardinality="1" default="Filter failed" name="logFailure" type="string"/>
+        <field cardinality="1" default="Filter passed" name="logSuccess" type="string"/>
+        <field cardinality="1" name="category" type="@Category">
+            <defaultRef>
+                <key type="CategoryGroup">
+                  <id field="name" value="Filter Categories"/>
+                  <key type="Category">
+                      <id field="name" value="miscellaneous"/>
+                  </key>
+                </key>
+            </defaultRef>
+        </field>
+      <field cardinality="1" default="0" name="abortProcessingOnLogError" type="boolean"/>
+      <field cardinality="1" default="SERVICE" name="logMaskType" type="string"/>
+      <field cardinality="*" name="classloader" type="^ClassLoader"/>
+    </entityType>
+<entityType xmlns="http://www.vordel.com/2005/06/24/entityStore" extends="Filter" name="SetAttributeFilter">
+        <constant name="_version" type="integer" value="0"/>
+  
+    <!-- Name of the Filter class that encapsulates this configuration entity -->
+    <constant name="class" type="string" value="com.vordel.circuit.attribute.SetAttributeFilter"/>
+    
+    <!-- List of the configuration parameters, their types, and their default values -->
+    <field cardinality="1" default="" name="messageAttribute" type="string"/>	
+    <field cardinality="1" default="" name="attributeValue" type="string"/>	
+  </entityType>
+<entityType xmlns="http://www.vordel.com/2005/06/24/entityStore" extends="Filter" name="AddHTTPHeaderFilter">
+        <constant name="_version" type="integer" value="5"/>
+		<constant name="class" type="string" value="com.vordel.circuit.conversion.AddHTTPHeaderFilter"/>
+		<field cardinality="1" name="headerName" type="string"/>	
+        <field cardinality="1" name="headerValue" type="string"/>	
+        <field cardinality="1" default="0" name="base64Encode" type="boolean"/>
+        <field cardinality="1" default="1" name="overwriteExistingHeader" type="boolean"/>
+        <field cardinality="1" default="httpheaders" name="addWhere" type="string"/>
+        </entityType>
+<entityType xmlns="http://www.vordel.com/2005/06/24/entityStore" extends="Filter" name="CircuitChainFilter">
+    <constant name="_version" type="integer" value="1"/>
+    <constant name="class" type="string" value="com.vordel.circuit.CircuitChainFilter"/>
+    <componentType cardinality="*" name="CircuitReference"/>
+    <field name="start" type="^CircuitReference"/>
+  </entityType>
+<entityType xmlns="http://www.vordel.com/2005/06/24/entityStore" extends="CircuitChainFilter" name="SwitchFilter">
+		<constant name="_version" type="integer" value="4"/>
+		<constant name="class" type="string" value="com.vordel.circuit.switchcase.SwitchFilter"/>
+        <field cardinality="1" name="attributeName" type="string"/>       
+        <field cardinality="1" default="RETURN_DEFAULT_CIRCUIT" name="defaultOption" type="string"/> 
+        <field cardinality="1" name="defaultCircuit" type="^FilterCircuit"/> 
+	</entityType>
+<entityType xmlns="http://www.vordel.com/2005/06/24/entityStore" abstract="true" extends="Filter" name="ConversionFilter">
+        <constant name="_version" type="integer" value="0"/>
+		<field cardinality="?" name="outputContentType" type="string"/> 
+	</entityType>
+<entityType xmlns="http://www.vordel.com/2005/06/24/entityStore" extends="ConversionFilter" name="ChangeMessageFilter">
+        <constant name="_version" type="integer" value="0"/>
+		<constant name="class" type="string" value="com.vordel.circuit.conversion.ChangeMessageFilter"/>
+		<field cardinality="1" default="" name="body" type="string"/>	
+         </entityType>
+<entityType xmlns="http://www.vordel.com/2005/06/24/entityStore" extends="Filter" name="CompareAttributeFilter">
+        <constant name="_version" type="integer" value="0"/>
+        <constant name="class" type="string" value="com.vordel.circuit.attribute.CompareAttributeFilter"/>
+        <componentType name="AttributeCompare"/>
+        <field default="MATCH_ALL" name="matchingRule" type="string"/>
+    </entityType>
+<entityType xmlns="http://www.vordel.com/2005/06/24/entityStore" extends="Filter" name="SetHTTPStatusCode">
+        <constant name="_version" type="integer" value="0"/>
+		<constant name="class" type="string" value="com.vordel.circuit.net.SetHTTPStatusFilter"/>
+        <field cardinality="1" default="200" name="httpResponseStatus" type="integer"/>
+	</entityType>
+<entityType xmlns="http://www.vordel.com/2005/06/24/entityStore" extends="SetHTTPStatusCode" name="Reflector">
+        <constant name="_version" type="integer" value="0"/>
+		<constant name="class" type="string" value="com.vordel.circuit.net.ReflectFilter"/>
+	</entityType>
+<entityType xmlns="http://www.vordel.com/2005/06/24/entityStore" extends="Filter" name="SetResponseStatusFilter">
+        <constant name="_version" type="integer" value="0"/>
+		<constant name="class" type="string" value="com.vordel.circuit.basic.SetResponseStatusFilter"/>                    
+        <field cardinality="1" default="2" name="responseStatus" type="integer"/>
+    </entityType>
+</entityStoreData>
+	]]></realizedTypes>
+</metaInfo>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="FilterCircuit">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+	</key>
+	<fval name="category"><value contentType="reference">
+		<key type='PolicyCategoryGroup'>
+			<id field='name' value='Policy Categories'/>
+			<key type='PolicyCategory'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="description"><value></value></fval>
+	<fval name="logMask"><value>3</value></fval>
+	<fval name="name"><value>Status Code Tester</value></fval>
+	<fval name="start"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='HTTP Status Codes'/>
+			<key type='FilterCircuit'>
+				<id field='name' value='Status Code Tester'/>
+				<key type='CompareAttributeFilter'>
+					<id field='name' value='Check if format is XML'/>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="SwitchFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='FilterCircuit'>
+			<id field='name' value='Status Code Tester'/>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="attributeName"><value>${http.request.rawURI.query}</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="defaultCircuit"><value contentType="reference">-1</value></fval>
+	<fval name="defaultOption"><value>RETURN_FALSE</value></fval>
+	<fval name="logFailure"><value>Filter failed</value></fval>
+	<fval name="logFatal"><value>Filter aborted due to exception</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Filter passed</value></fval>
+	<fval name="name"><value>Call XML Policy by Status Code</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="SwitchCircuitReference">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='FilterCircuit'>
+			<id field='name' value='Status Code Tester'/>
+			<key type='SwitchFilter'>
+				<id field='name' value='Call XML Policy by Status Code'/>
+			</key>
+		</key>
+	</key>
+	<fval name="circuitPK"><value contentType="reference">
+<key type='CircuitContainer'><id field='name' value='HTTP Status Codes'/><key type='CircuitContainer'><id field='name' value='2xx Codes'/><key type='CircuitContainer'><id field='name' value='2xx XML Responses'/><key type='FilterCircuit'><id field='name' value='202 Accepted XML Response'/></key></key></key></key>	</value></fval>
+	<fval name="comparatorType"><value>contains</value></fval>
+	<fval name="compareWith"><value>202</value></fval>
+	<fval name="evaluate"><value>true</value></fval>
+	<fval name="name"><value>Id-0001517237109697-000000002d12496b-1</value></fval>
+	<fval name="priority"><value>3</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="SwitchCircuitReference">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='FilterCircuit'>
+			<id field='name' value='Status Code Tester'/>
+			<key type='SwitchFilter'>
+				<id field='name' value='Call XML Policy by Status Code'/>
+			</key>
+		</key>
+	</key>
+	<fval name="circuitPK"><value contentType="reference">
+<key type='CircuitContainer'><id field='name' value='HTTP Status Codes'/><key type='CircuitContainer'><id field='name' value='2xx Codes'/><key type='CircuitContainer'><id field='name' value='2xx XML Responses'/><key type='FilterCircuit'><id field='name' value='200 OK XML Response'/></key></key></key></key>	</value></fval>
+	<fval name="comparatorType"><value>contains</value></fval>
+	<fval name="compareWith"><value>200</value></fval>
+	<fval name="evaluate"><value>true</value></fval>
+	<fval name="name"><value>Id-0001517232923034-ffffffff9c9eea23-1</value></fval>
+	<fval name="priority"><value>1</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="SwitchCircuitReference">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='FilterCircuit'>
+			<id field='name' value='Status Code Tester'/>
+			<key type='SwitchFilter'>
+				<id field='name' value='Call XML Policy by Status Code'/>
+			</key>
+		</key>
+	</key>
+	<fval name="circuitPK"><value contentType="reference">
+<key type='CircuitContainer'><id field='name' value='HTTP Status Codes'/><key type='CircuitContainer'><id field='name' value='2xx Codes'/><key type='CircuitContainer'><id field='name' value='2xx XML Responses'/><key type='FilterCircuit'><id field='name' value='201 Created XML Response'/></key></key></key></key>	</value></fval>
+	<fval name="comparatorType"><value>contains</value></fval>
+	<fval name="compareWith"><value>201</value></fval>
+	<fval name="evaluate"><value>true</value></fval>
+	<fval name="name"><value>Id-0001517233113429-0000000030d66b36-1</value></fval>
+	<fval name="priority"><value>2</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="CompareAttributeFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='FilterCircuit'>
+			<id field='name' value='Status Code Tester'/>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="failureNode"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='HTTP Status Codes'/>
+			<key type='FilterCircuit'>
+				<id field='name' value='Status Code Tester'/>
+				<key type='CompareAttributeFilter'>
+					<id field='name' value='Check if format is JSON'/>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="logFailure"><value>Filter failed</value></fval>
+	<fval name="logFatal"><value>Filter aborted due to exception</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Filter passed</value></fval>
+	<fval name="matchingRule"><value>MATCH_ALL</value></fval>
+	<fval name="name"><value>Check if format is XML</value></fval>
+	<fval name="successNode"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='HTTP Status Codes'/>
+			<key type='FilterCircuit'>
+				<id field='name' value='Status Code Tester'/>
+				<key type='SwitchFilter'>
+					<id field='name' value='Call XML Policy by Status Code'/>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="AttributeCompare">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='FilterCircuit'>
+			<id field='name' value='Status Code Tester'/>
+			<key type='CompareAttributeFilter'>
+				<id field='name' value='Check if format is XML'/>
+			</key>
+		</key>
+	</key>
+	<fval name="attrName"><value>http.request.rawURI.query</value></fval>
+	<fval name="expression"><value>xml</value></fval>
+	<fval name="matchType"><value>CONTAINS</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="SwitchFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='FilterCircuit'>
+			<id field='name' value='Status Code Tester'/>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="attributeName"><value>${http.request.rawURI.query}</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="defaultCircuit"><value contentType="reference">-1</value></fval>
+	<fval name="defaultOption"><value>RETURN_FALSE</value></fval>
+	<fval name="logFailure"><value>Filter failed</value></fval>
+	<fval name="logFatal"><value>Filter aborted due to exception</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Filter passed</value></fval>
+	<fval name="name"><value>Call HTML Policy by Status Code</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="SwitchCircuitReference">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='FilterCircuit'>
+			<id field='name' value='Status Code Tester'/>
+			<key type='SwitchFilter'>
+				<id field='name' value='Call HTML Policy by Status Code'/>
+			</key>
+		</key>
+	</key>
+	<fval name="circuitPK"><value contentType="reference">
+<key type='CircuitContainer'><id field='name' value='HTTP Status Codes'/><key type='CircuitContainer'><id field='name' value='4xx Codes'/><key type='CircuitContainer'><id field='name' value='4xx HTML Responses'/><key type='FilterCircuit'><id field='name' value='Return HTTP Error 401: Unauthorized'/></key></key></key></key>	</value></fval>
+	<fval name="comparatorType"><value>contains</value></fval>
+	<fval name="compareWith"><value>401</value></fval>
+	<fval name="evaluate"><value>true</value></fval>
+	<fval name="name"><value>Id-0001517412895357-ffffffffb534b1b5-1</value></fval>
+	<fval name="priority"><value>3</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="SwitchCircuitReference">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='FilterCircuit'>
+			<id field='name' value='Status Code Tester'/>
+			<key type='SwitchFilter'>
+				<id field='name' value='Call HTML Policy by Status Code'/>
+			</key>
+		</key>
+	</key>
+	<fval name="circuitPK"><value contentType="reference">
+<key type='CircuitContainer'><id field='name' value='HTTP Status Codes'/><key type='CircuitContainer'><id field='name' value='2xx Codes'/><key type='CircuitContainer'><id field='name' value='2xx HTML Responses'/><key type='FilterCircuit'><id field='name' value='200 OK HTML Response'/></key></key></key></key>	</value></fval>
+	<fval name="comparatorType"><value>contains</value></fval>
+	<fval name="compareWith"><value>200</value></fval>
+	<fval name="evaluate"><value>true</value></fval>
+	<fval name="name"><value>Id-0001517232923034-ffffffff9c9eea23-1</value></fval>
+	<fval name="priority"><value>0</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="SwitchCircuitReference">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='FilterCircuit'>
+			<id field='name' value='Status Code Tester'/>
+			<key type='SwitchFilter'>
+				<id field='name' value='Call HTML Policy by Status Code'/>
+			</key>
+		</key>
+	</key>
+	<fval name="circuitPK"><value contentType="reference">
+<key type='CircuitContainer'><id field='name' value='HTTP Status Codes'/><key type='CircuitContainer'><id field='name' value='2xx Codes'/><key type='CircuitContainer'><id field='name' value='2xx HTML Responses'/><key type='FilterCircuit'><id field='name' value='202 Accepted HTML Response'/></key></key></key></key>	</value></fval>
+	<fval name="comparatorType"><value>contains</value></fval>
+	<fval name="compareWith"><value>202</value></fval>
+	<fval name="evaluate"><value>true</value></fval>
+	<fval name="name"><value>Id-0001517413505025-000000000b3db0c3-1</value></fval>
+	<fval name="priority"><value>2</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="SwitchCircuitReference">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='FilterCircuit'>
+			<id field='name' value='Status Code Tester'/>
+			<key type='SwitchFilter'>
+				<id field='name' value='Call HTML Policy by Status Code'/>
+			</key>
+		</key>
+	</key>
+	<fval name="circuitPK"><value contentType="reference">
+<key type='CircuitContainer'><id field='name' value='HTTP Status Codes'/><key type='CircuitContainer'><id field='name' value='2xx Codes'/><key type='CircuitContainer'><id field='name' value='2xx HTML Responses'/><key type='FilterCircuit'><id field='name' value='201 Created HTML Response'/></key></key></key></key>	</value></fval>
+	<fval name="comparatorType"><value>contains</value></fval>
+	<fval name="compareWith"><value>201</value></fval>
+	<fval name="evaluate"><value>true</value></fval>
+	<fval name="name"><value>Id-0001517233113429-0000000030d66b36-1</value></fval>
+	<fval name="priority"><value>1</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="CompareAttributeFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='FilterCircuit'>
+			<id field='name' value='Status Code Tester'/>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="logFailure"><value>Filter failed</value></fval>
+	<fval name="logFatal"><value>Filter aborted due to exception</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Filter passed</value></fval>
+	<fval name="matchingRule"><value>MATCH_ALL</value></fval>
+	<fval name="name"><value>Check if format is HTML</value></fval>
+	<fval name="successNode"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='HTTP Status Codes'/>
+			<key type='FilterCircuit'>
+				<id field='name' value='Status Code Tester'/>
+				<key type='SwitchFilter'>
+					<id field='name' value='Call HTML Policy by Status Code'/>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="AttributeCompare">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='FilterCircuit'>
+			<id field='name' value='Status Code Tester'/>
+			<key type='CompareAttributeFilter'>
+				<id field='name' value='Check if format is HTML'/>
+			</key>
+		</key>
+	</key>
+	<fval name="attrName"><value>http.request.rawURI.query</value></fval>
+	<fval name="expression"><value>html</value></fval>
+	<fval name="matchType"><value>CONTAINS</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="CompareAttributeFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='FilterCircuit'>
+			<id field='name' value='Status Code Tester'/>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="failureNode"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='HTTP Status Codes'/>
+			<key type='FilterCircuit'>
+				<id field='name' value='Status Code Tester'/>
+				<key type='CompareAttributeFilter'>
+					<id field='name' value='Check if format is HTML'/>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="logFailure"><value>Filter failed</value></fval>
+	<fval name="logFatal"><value>Filter aborted due to exception</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Filter passed</value></fval>
+	<fval name="matchingRule"><value>MATCH_ALL</value></fval>
+	<fval name="name"><value>Check if format is JSON</value></fval>
+	<fval name="successNode"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='HTTP Status Codes'/>
+			<key type='FilterCircuit'>
+				<id field='name' value='Status Code Tester'/>
+				<key type='SwitchFilter'>
+					<id field='name' value='Call JSON Policy by Status Code'/>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="AttributeCompare">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='FilterCircuit'>
+			<id field='name' value='Status Code Tester'/>
+			<key type='CompareAttributeFilter'>
+				<id field='name' value='Check if format is JSON'/>
+			</key>
+		</key>
+	</key>
+	<fval name="attrName"><value>http.request.rawURI.query</value></fval>
+	<fval name="expression"><value>json</value></fval>
+	<fval name="matchType"><value>CONTAINS</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="SwitchFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='FilterCircuit'>
+			<id field='name' value='Status Code Tester'/>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="attributeName"><value>${http.request.rawURI.query}</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="defaultCircuit"><value contentType="reference">-1</value></fval>
+	<fval name="defaultOption"><value>RETURN_FALSE</value></fval>
+	<fval name="logFailure"><value>Filter failed</value></fval>
+	<fval name="logFatal"><value>Filter aborted due to exception</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Filter passed</value></fval>
+	<fval name="name"><value>Call JSON Policy by Status Code</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="SwitchCircuitReference">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='FilterCircuit'>
+			<id field='name' value='Status Code Tester'/>
+			<key type='SwitchFilter'>
+				<id field='name' value='Call JSON Policy by Status Code'/>
+			</key>
+		</key>
+	</key>
+	<fval name="circuitPK"><value contentType="reference">
+<key type='CircuitContainer'><id field='name' value='HTTP Status Codes'/><key type='CircuitContainer'><id field='name' value='2xx Codes'/><key type='CircuitContainer'><id field='name' value='2xx JSON Responses'/><key type='FilterCircuit'><id field='name' value='201 Created JSON Response'/></key></key></key></key>	</value></fval>
+	<fval name="comparatorType"><value>contains</value></fval>
+	<fval name="compareWith"><value>201</value></fval>
+	<fval name="evaluate"><value>true</value></fval>
+	<fval name="name"><value>Id-0001517233113429-0000000030d66b36-1</value></fval>
+	<fval name="priority"><value>1</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="SwitchCircuitReference">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='FilterCircuit'>
+			<id field='name' value='Status Code Tester'/>
+			<key type='SwitchFilter'>
+				<id field='name' value='Call JSON Policy by Status Code'/>
+			</key>
+		</key>
+	</key>
+	<fval name="circuitPK"><value contentType="reference">
+<key type='CircuitContainer'><id field='name' value='HTTP Status Codes'/><key type='CircuitContainer'><id field='name' value='2xx Codes'/><key type='CircuitContainer'><id field='name' value='2xx JSON Responses'/><key type='FilterCircuit'><id field='name' value='200 OK JSON Response'/></key></key></key></key>	</value></fval>
+	<fval name="comparatorType"><value>contains</value></fval>
+	<fval name="compareWith"><value>200</value></fval>
+	<fval name="evaluate"><value>true</value></fval>
+	<fval name="name"><value>Id-0001517232923034-ffffffff9c9eea23-1</value></fval>
+	<fval name="priority"><value>0</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="SwitchCircuitReference">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='FilterCircuit'>
+			<id field='name' value='Status Code Tester'/>
+			<key type='SwitchFilter'>
+				<id field='name' value='Call JSON Policy by Status Code'/>
+			</key>
+		</key>
+	</key>
+	<fval name="circuitPK"><value contentType="reference">
+<key type='CircuitContainer'><id field='name' value='HTTP Status Codes'/><key type='CircuitContainer'><id field='name' value='2xx Codes'/><key type='CircuitContainer'><id field='name' value='2xx JSON Responses'/><key type='FilterCircuit'><id field='name' value='202 Accepted JSON Response'/></key></key></key></key>	</value></fval>
+	<fval name="comparatorType"><value>contains</value></fval>
+	<fval name="compareWith"><value>202</value></fval>
+	<fval name="evaluate"><value>true</value></fval>
+	<fval name="name"><value>Id-0001517411155198-0000000051c52da9-1</value></fval>
+	<fval name="priority"><value>2</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="CircuitContainer">
+	<fval name="name"><value>HTTP Status Codes</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="CircuitContainer">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+	</key>
+	<fval name="name"><value>1xx Codes</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="CircuitContainer">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='1xx Codes'/>
+		</key>
+	</key>
+	<fval name="name"><value>1xx XML Responses</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="CircuitContainer">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='1xx Codes'/>
+		</key>
+	</key>
+	<fval name="name"><value>1xx JSON Responses</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="CircuitContainer">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='1xx Codes'/>
+		</key>
+	</key>
+	<fval name="name"><value>1xx HTML Responses</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="CircuitContainer">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+	</key>
+	<fval name="name"><value>3xx Codes</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="CircuitContainer">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='3xx Codes'/>
+		</key>
+	</key>
+	<fval name="name"><value>3xx HTML Responses</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="CircuitContainer">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='3xx Codes'/>
+		</key>
+	</key>
+	<fval name="name"><value>3xx No Payload Responses</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="FilterCircuit">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='3xx Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='3xx No Payload Responses'/>
+			</key>
+		</key>
+	</key>
+	<fval name="category"><value contentType="reference">
+		<key type='PolicyCategoryGroup'>
+			<id field='name' value='Policy Categories'/>
+			<key type='PolicyCategory'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="description"><value>No need to retransmit payload.</value></fval>
+	<fval name="logMask"><value>3</value></fval>
+	<fval name="name"><value>304 Not Modified XML Response</value></fval>
+	<fval name="start"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='HTTP Status Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='3xx Codes'/>
+				<key type='CircuitContainer'>
+					<id field='name' value='3xx No Payload Responses'/>
+					<key type='FilterCircuit'>
+						<id field='name' value='304 Not Modified XML Response'/>
+						<key type='Reflector'>
+							<id field='name' value='Reflect Message - HTTP 304'/>
+						</key>
+					</key>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="Reflector">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='3xx Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='3xx No Payload Responses'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='304 Not Modified XML Response'/>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="httpResponseStatus"><value>304</value></fval>
+	<fval name="logFailure"><value>Failed to echo back the message</value></fval>
+	<fval name="logFatal"><value>Error occurred while echoing the message. Error: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Successfully echoed back the message</value></fval>
+	<fval name="name"><value>Reflect Message - HTTP 304</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="CircuitContainer">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='3xx Codes'/>
+		</key>
+	</key>
+	<fval name="name"><value>3xx JSON Responses</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="CircuitContainer">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='3xx Codes'/>
+		</key>
+	</key>
+	<fval name="name"><value>3xx XML Responses</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="CircuitContainer">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+	</key>
+	<fval name="name"><value>4xx Codes</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="CircuitContainer">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='4xx Codes'/>
+		</key>
+	</key>
+	<fval name="name"><value>4xx XML Responses</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="CircuitContainer">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='4xx Codes'/>
+		</key>
+	</key>
+	<fval name="name"><value>4xx JSON Responses</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="CircuitContainer">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='4xx Codes'/>
+		</key>
+	</key>
+	<fval name="name"><value>4xx HTML Responses</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="FilterCircuit">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='4xx Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='4xx HTML Responses'/>
+			</key>
+		</key>
+	</key>
+	<fval name="category"><value contentType="reference">
+		<key type='PolicyCategoryGroup'>
+			<id field='name' value='Policy Categories'/>
+			<key type='PolicyCategory'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="logMask"><value>3</value></fval>
+	<fval name="name"><value>Return HTTP Error 401: Unauthorized</value></fval>
+	<fval name="start"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='HTTP Status Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='4xx Codes'/>
+				<key type='CircuitContainer'>
+					<id field='name' value='4xx HTML Responses'/>
+					<key type='FilterCircuit'>
+						<id field='name' value='Return HTTP Error 401: Unauthorized'/>
+						<key type='ChangeMessageFilter'>
+							<id field='name' value='Make the &quot;Unauthorized&quot; Message'/>
+						</key>
+					</key>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="ChangeMessageFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='4xx Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='4xx HTML Responses'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='Return HTTP Error 401: Unauthorized'/>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="body"><value>&lt;!DOCTYPE HTML PUBLIC &quot;-//IETF//DTD HTML 2.0//EN&quot;&gt;&#xA;&lt;HTML&gt;&lt;HEAD&gt;&#xA;&lt;TITLE&gt;401 Authorization Required&lt;/TITLE&gt;&#xA;&lt;/HEAD&gt;&lt;BODY&gt;&#xA;&lt;H1&gt;Authorization Required&lt;/H1&gt;&#xA;This server could not verify that you&#xA;are authorized to access the document&#xA;requested.  Either you supplied the wrong&#xA;credentials (e.g., bad password), or your&#xA;browser doesn&apos;t understand how to supply&#xA;the credentials required.&lt;P&gt;&#xA;&lt;HR&gt;&#xA;&lt;/BODY&gt;&lt;/HTML&gt;</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="logFailure"><value>Failed in setting the message</value></fval>
+	<fval name="logFatal"><value>Error in setting the message. Error: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Success in setting the message</value></fval>
+	<fval name="name"><value>Make the &quot;Unauthorized&quot; Message</value></fval>
+	<fval name="outputContentType"><value>text/html</value></fval>
+	<fval name="successNode"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='HTTP Status Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='4xx Codes'/>
+				<key type='CircuitContainer'>
+					<id field='name' value='4xx HTML Responses'/>
+					<key type='FilterCircuit'>
+						<id field='name' value='Return HTTP Error 401: Unauthorized'/>
+						<key type='Reflector'>
+							<id field='name' value='Pass the &quot;Unauthorized&quot; message back'/>
+						</key>
+					</key>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="Reflector">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='4xx Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='4xx HTML Responses'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='Return HTTP Error 401: Unauthorized'/>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="httpResponseStatus"><value>401</value></fval>
+	<fval name="logFailure"><value>Failed to echo back the message</value></fval>
+	<fval name="logFatal"><value>Error occurred while echoing the message. Error: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>6</value></fval>
+	<fval name="logMaskType"><value>FILTER</value></fval>
+	<fval name="logSuccess"><value>Successfully echoed back the message to IP Address ${http.request.clientaddr}</value></fval>
+	<fval name="name"><value>Pass the &quot;Unauthorized&quot; message back</value></fval>
+	<fval name="successNode"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='HTTP Status Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='4xx Codes'/>
+				<key type='CircuitContainer'>
+					<id field='name' value='4xx HTML Responses'/>
+					<key type='FilterCircuit'>
+						<id field='name' value='Return HTTP Error 401: Unauthorized'/>
+						<key type='SetResponseStatusFilter'>
+							<id field='name' value='Flag as blocked message'/>
+						</key>
+					</key>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="SetResponseStatusFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='4xx Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='4xx HTML Responses'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='Return HTTP Error 401: Unauthorized'/>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="logFailure"><value>Failed to set the response status</value></fval>
+	<fval name="logFatal"><value>SetResponseStatusFilter error. Error: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Successfully set the response status</value></fval>
+	<fval name="name"><value>Flag as blocked message</value></fval>
+	<fval name="responseStatus"><value>3</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="CircuitContainer">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+	</key>
+	<fval name="name"><value>2xx Codes</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="CircuitContainer">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='2xx Codes'/>
+		</key>
+	</key>
+	<fval name="name"><value>2xx No Payload Responses</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="FilterCircuit">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='2xx Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx No Payload Responses'/>
+			</key>
+		</key>
+	</key>
+	<fval name="category"><value contentType="reference">
+		<key type='PolicyCategoryGroup'>
+			<id field='name' value='Policy Categories'/>
+			<key type='PolicyCategory'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="description"><value>Server processed request, but is not returning content.</value></fval>
+	<fval name="logMask"><value>3</value></fval>
+	<fval name="name"><value>204 No Content XML Response</value></fval>
+	<fval name="start"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='HTTP Status Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx Codes'/>
+				<key type='CircuitContainer'>
+					<id field='name' value='2xx No Payload Responses'/>
+					<key type='FilterCircuit'>
+						<id field='name' value='204 No Content XML Response'/>
+						<key type='Reflector'>
+							<id field='name' value='Reflect Message - HTTP 204'/>
+						</key>
+					</key>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="Reflector">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='2xx Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx No Payload Responses'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='204 No Content XML Response'/>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="httpResponseStatus"><value>204</value></fval>
+	<fval name="logFailure"><value>Failed to echo back the message</value></fval>
+	<fval name="logFatal"><value>Error occurred while echoing the message. Error: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Successfully echoed back the message</value></fval>
+	<fval name="name"><value>Reflect Message - HTTP 204</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="CircuitContainer">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='2xx Codes'/>
+		</key>
+	</key>
+	<fval name="name"><value>2xx JSON Responses</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="FilterCircuit">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='2xx Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx JSON Responses'/>
+			</key>
+		</key>
+	</key>
+	<fval name="category"><value contentType="reference">
+		<key type='PolicyCategoryGroup'>
+			<id field='name' value='Policy Categories'/>
+			<key type='PolicyCategory'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="description"><value>Succesfull submission for later processing.</value></fval>
+	<fval name="logMask"><value>3</value></fval>
+	<fval name="name"><value>202 Accepted JSON Response</value></fval>
+	<fval name="start"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='HTTP Status Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx Codes'/>
+				<key type='CircuitContainer'>
+					<id field='name' value='2xx JSON Responses'/>
+					<key type='FilterCircuit'>
+						<id field='name' value='202 Accepted JSON Response'/>
+						<key type='SetAttributeFilter'>
+							<id field='name' value='Set Response Content'/>
+						</key>
+					</key>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="ChangeMessageFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='2xx Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx JSON Responses'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='202 Accepted JSON Response'/>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="body"><value>{&quot;httpstatus&quot;: {&#xD;&#xA;&quot;httpstatuscode&quot;: &quot;202&quot;,&#xD;&#xA;&quot;httpstatusresponse&quot;: &quot;${responseContent}&quot;&#xD;&#xA;}}</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="logFailure"><value>Failed in setting the message</value></fval>
+	<fval name="logFatal"><value>Error in setting the message. Error: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Success in setting the message</value></fval>
+	<fval name="name"><value>HTTP Status 202 JSON Response</value></fval>
+	<fval name="outputContentType"><value>application/json</value></fval>
+	<fval name="successNode"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='HTTP Status Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx Codes'/>
+				<key type='CircuitContainer'>
+					<id field='name' value='2xx JSON Responses'/>
+					<key type='FilterCircuit'>
+						<id field='name' value='202 Accepted JSON Response'/>
+						<key type='Reflector'>
+							<id field='name' value='Reflect Message - HTTP 202'/>
+						</key>
+					</key>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="Reflector">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='2xx Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx JSON Responses'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='202 Accepted JSON Response'/>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="httpResponseStatus"><value>202</value></fval>
+	<fval name="logFailure"><value>Failed to echo back the message</value></fval>
+	<fval name="logFatal"><value>Error occurred while echoing the message. Error: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Successfully echoed back the message</value></fval>
+	<fval name="name"><value>Reflect Message - HTTP 202</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="SetAttributeFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='2xx Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx JSON Responses'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='202 Accepted JSON Response'/>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="attributeValue"><value>ACCEPTED</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="logFailure"><value>Failed to set the attribute value</value></fval>
+	<fval name="logFatal"><value>Error while setting the attribute value. Error: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Set the attribute value</value></fval>
+	<fval name="messageAttribute"><value>responseContent</value></fval>
+	<fval name="name"><value>Set Response Content</value></fval>
+	<fval name="successNode"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='HTTP Status Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx Codes'/>
+				<key type='CircuitContainer'>
+					<id field='name' value='2xx JSON Responses'/>
+					<key type='FilterCircuit'>
+						<id field='name' value='202 Accepted JSON Response'/>
+						<key type='ChangeMessageFilter'>
+							<id field='name' value='HTTP Status 202 JSON Response'/>
+						</key>
+					</key>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="FilterCircuit">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='2xx Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx JSON Responses'/>
+			</key>
+		</key>
+	</key>
+	<fval name="category"><value contentType="reference">
+		<key type='PolicyCategoryGroup'>
+			<id field='name' value='Policy Categories'/>
+			<key type='PolicyCategory'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="description"><value>Sucessful operation with new resource creation.</value></fval>
+	<fval name="logMask"><value>3</value></fval>
+	<fval name="name"><value>201 Created JSON Response</value></fval>
+	<fval name="start"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='HTTP Status Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx Codes'/>
+				<key type='CircuitContainer'>
+					<id field='name' value='2xx JSON Responses'/>
+					<key type='FilterCircuit'>
+						<id field='name' value='201 Created JSON Response'/>
+						<key type='SetAttributeFilter'>
+							<id field='name' value='Set New Resource ID'/>
+						</key>
+					</key>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="SetAttributeFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='2xx Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx JSON Responses'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='201 Created JSON Response'/>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="attributeValue"><value>1234</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="logFailure"><value>Failed to set the attribute value</value></fval>
+	<fval name="logFatal"><value>Error while setting the attribute value. Error: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Set the attribute value</value></fval>
+	<fval name="messageAttribute"><value>newResourceID</value></fval>
+	<fval name="name"><value>Set New Resource ID</value></fval>
+	<fval name="successNode"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='HTTP Status Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx Codes'/>
+				<key type='CircuitContainer'>
+					<id field='name' value='2xx JSON Responses'/>
+					<key type='FilterCircuit'>
+						<id field='name' value='201 Created JSON Response'/>
+						<key type='SetAttributeFilter'>
+							<id field='name' value='Set &quot;Location&quot; Value'/>
+						</key>
+					</key>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="SetAttributeFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='2xx Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx JSON Responses'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='201 Created JSON Response'/>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="attributeValue"><value>${http.request.protocol}://${http.request.hostname}:8080${http.request.path}/${newResourceID}</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="logFailure"><value>Failed to set the attribute value</value></fval>
+	<fval name="logFatal"><value>Error while setting the attribute value. Error: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Set the attribute value</value></fval>
+	<fval name="messageAttribute"><value>location</value></fval>
+	<fval name="name"><value>Set &quot;Location&quot; Value</value></fval>
+	<fval name="successNode"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='HTTP Status Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx Codes'/>
+				<key type='CircuitContainer'>
+					<id field='name' value='2xx JSON Responses'/>
+					<key type='FilterCircuit'>
+						<id field='name' value='201 Created JSON Response'/>
+						<key type='AddHTTPHeaderFilter'>
+							<id field='name' value='Add HTTP &quot;Location&quot; Header'/>
+						</key>
+					</key>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="AddHTTPHeaderFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='2xx Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx JSON Responses'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='201 Created JSON Response'/>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="addWhere"><value>httpheaders</value></fval>
+	<fval name="base64Encode"><value>0</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="headerName"><value>Location</value></fval>
+	<fval name="headerValue"><value>${location}</value></fval>
+	<fval name="logFailure"><value>Failed in adding the HTTP header to the message</value></fval>
+	<fval name="logFatal"><value>Error in adding the HTTP header to the message. Error: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Success in adding the HTTP header to the message</value></fval>
+	<fval name="name"><value>Add HTTP &quot;Location&quot; Header</value></fval>
+	<fval name="overwriteExistingHeader"><value>1</value></fval>
+	<fval name="successNode"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='HTTP Status Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx Codes'/>
+				<key type='CircuitContainer'>
+					<id field='name' value='2xx JSON Responses'/>
+					<key type='FilterCircuit'>
+						<id field='name' value='201 Created JSON Response'/>
+						<key type='ChangeMessageFilter'>
+							<id field='name' value='HTTP Status 201 JSON Response'/>
+						</key>
+					</key>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="Reflector">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='2xx Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx JSON Responses'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='201 Created JSON Response'/>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="httpResponseStatus"><value>201</value></fval>
+	<fval name="logFailure"><value>Failed to echo back the message</value></fval>
+	<fval name="logFatal"><value>Error occurred while echoing the message. Error: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Successfully echoed back the message</value></fval>
+	<fval name="name"><value>Reflect Message - HTTP 201</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="ChangeMessageFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='2xx Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx JSON Responses'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='201 Created JSON Response'/>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="body"><value>{&quot;httpstatus&quot;: {&#xD;&#xA;&quot;httpstatuscode&quot;: &quot;201&quot;,&#xD;&#xA;&quot;httpstatusresponse&quot;: &quot;New Resource created at ${location}&quot;&#xD;&#xA;}}</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="logFailure"><value>Failed in setting the message</value></fval>
+	<fval name="logFatal"><value>Error in setting the message. Error: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Success in setting the message</value></fval>
+	<fval name="name"><value>HTTP Status 201 JSON Response</value></fval>
+	<fval name="outputContentType"><value>application/json</value></fval>
+	<fval name="successNode"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='HTTP Status Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx Codes'/>
+				<key type='CircuitContainer'>
+					<id field='name' value='2xx JSON Responses'/>
+					<key type='FilterCircuit'>
+						<id field='name' value='201 Created JSON Response'/>
+						<key type='Reflector'>
+							<id field='name' value='Reflect Message - HTTP 201'/>
+						</key>
+					</key>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="FilterCircuit">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='2xx Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx JSON Responses'/>
+			</key>
+		</key>
+	</key>
+	<fval name="category"><value contentType="reference">
+		<key type='PolicyCategoryGroup'>
+			<id field='name' value='Policy Categories'/>
+			<key type='PolicyCategory'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="description"><value>Standard HTTP success response.</value></fval>
+	<fval name="logMask"><value>3</value></fval>
+	<fval name="name"><value>200 OK JSON Response</value></fval>
+	<fval name="start"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='HTTP Status Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx Codes'/>
+				<key type='CircuitContainer'>
+					<id field='name' value='2xx JSON Responses'/>
+					<key type='FilterCircuit'>
+						<id field='name' value='200 OK JSON Response'/>
+						<key type='SetAttributeFilter'>
+							<id field='name' value='Set Response Content'/>
+						</key>
+					</key>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="ChangeMessageFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='2xx Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx JSON Responses'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='200 OK JSON Response'/>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="body"><value>{&quot;httpstatus&quot;: {&#xD;&#xA;&quot;httpstatuscode&quot;: &quot;200&quot;,&#xD;&#xA;&quot;httpstatusresponse&quot;: &quot;${responseContent}&quot;&#xD;&#xA;}}</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="logFailure"><value>Failed in setting the message</value></fval>
+	<fval name="logFatal"><value>Error in setting the message. Error: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Success in setting the message</value></fval>
+	<fval name="name"><value>HTTP Status 200 JSON Response</value></fval>
+	<fval name="outputContentType"><value>application/json</value></fval>
+	<fval name="successNode"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='HTTP Status Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx Codes'/>
+				<key type='CircuitContainer'>
+					<id field='name' value='2xx JSON Responses'/>
+					<key type='FilterCircuit'>
+						<id field='name' value='200 OK JSON Response'/>
+						<key type='Reflector'>
+							<id field='name' value='Reflect Message - HTTP 200'/>
+						</key>
+					</key>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="Reflector">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='2xx Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx JSON Responses'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='200 OK JSON Response'/>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="httpResponseStatus"><value>200</value></fval>
+	<fval name="logFailure"><value>Failed to echo back the message</value></fval>
+	<fval name="logFatal"><value>Error occurred while echoing the message. Error: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Successfully echoed back the message</value></fval>
+	<fval name="name"><value>Reflect Message - HTTP 200</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="SetAttributeFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='2xx Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx JSON Responses'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='200 OK JSON Response'/>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="attributeValue"><value>OK</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="logFailure"><value>Failed to set the attribute value</value></fval>
+	<fval name="logFatal"><value>Error while setting the attribute value. Error: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Set the attribute value</value></fval>
+	<fval name="messageAttribute"><value>responseContent</value></fval>
+	<fval name="name"><value>Set Response Content</value></fval>
+	<fval name="successNode"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='HTTP Status Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx Codes'/>
+				<key type='CircuitContainer'>
+					<id field='name' value='2xx JSON Responses'/>
+					<key type='FilterCircuit'>
+						<id field='name' value='200 OK JSON Response'/>
+						<key type='ChangeMessageFilter'>
+							<id field='name' value='HTTP Status 200 JSON Response'/>
+						</key>
+					</key>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="CircuitContainer">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='2xx Codes'/>
+		</key>
+	</key>
+	<fval name="name"><value>2xx XML Responses</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="FilterCircuit">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='2xx Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx XML Responses'/>
+			</key>
+		</key>
+	</key>
+	<fval name="category"><value contentType="reference">
+		<key type='PolicyCategoryGroup'>
+			<id field='name' value='Policy Categories'/>
+			<key type='PolicyCategory'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="description"><value>Standard HTTP success response.</value></fval>
+	<fval name="logMask"><value>3</value></fval>
+	<fval name="name"><value>200 OK XML Response</value></fval>
+	<fval name="start"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='HTTP Status Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx Codes'/>
+				<key type='CircuitContainer'>
+					<id field='name' value='2xx XML Responses'/>
+					<key type='FilterCircuit'>
+						<id field='name' value='200 OK XML Response'/>
+						<key type='SetAttributeFilter'>
+							<id field='name' value='Set Response Content'/>
+						</key>
+					</key>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="Reflector">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='2xx Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx XML Responses'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='200 OK XML Response'/>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="httpResponseStatus"><value>200</value></fval>
+	<fval name="logFailure"><value>Failed to echo back the message</value></fval>
+	<fval name="logFatal"><value>Error occurred while echoing the message. Error: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Successfully echoed back the message</value></fval>
+	<fval name="name"><value>Reflect Message - HTTP 200</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="ChangeMessageFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='2xx Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx XML Responses'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='200 OK XML Response'/>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="body"><value>&lt;HTTPStatus&gt;&#xD;&#xA;&lt;HTTPStatusCode&gt;200&lt;/HTTPStatusCode&gt;&#xD;&#xA;&lt;HTTPStatusResponse&gt;${responseContent}&lt;/HTTPStatusResponse&gt;&#xD;&#xA;&lt;/HTTPStatus&gt;</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="logFailure"><value>Failed in setting the message</value></fval>
+	<fval name="logFatal"><value>Error in setting the message. Error: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Success in setting the message</value></fval>
+	<fval name="name"><value>HTTP Status 200 XML Response</value></fval>
+	<fval name="outputContentType"><value>text/xml</value></fval>
+	<fval name="successNode"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='HTTP Status Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx Codes'/>
+				<key type='CircuitContainer'>
+					<id field='name' value='2xx XML Responses'/>
+					<key type='FilterCircuit'>
+						<id field='name' value='200 OK XML Response'/>
+						<key type='Reflector'>
+							<id field='name' value='Reflect Message - HTTP 200'/>
+						</key>
+					</key>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="SetAttributeFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='2xx Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx XML Responses'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='200 OK XML Response'/>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="attributeValue"><value>OK</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="logFailure"><value>Failed to set the attribute value</value></fval>
+	<fval name="logFatal"><value>Error while setting the attribute value. Error: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Set the attribute value</value></fval>
+	<fval name="messageAttribute"><value>responseContent</value></fval>
+	<fval name="name"><value>Set Response Content</value></fval>
+	<fval name="successNode"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='HTTP Status Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx Codes'/>
+				<key type='CircuitContainer'>
+					<id field='name' value='2xx XML Responses'/>
+					<key type='FilterCircuit'>
+						<id field='name' value='200 OK XML Response'/>
+						<key type='ChangeMessageFilter'>
+							<id field='name' value='HTTP Status 200 XML Response'/>
+						</key>
+					</key>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="FilterCircuit">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='2xx Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx XML Responses'/>
+			</key>
+		</key>
+	</key>
+	<fval name="category"><value contentType="reference">
+		<key type='PolicyCategoryGroup'>
+			<id field='name' value='Policy Categories'/>
+			<key type='PolicyCategory'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="description"><value>Sucessful operation with new resource creation.</value></fval>
+	<fval name="logMask"><value>3</value></fval>
+	<fval name="name"><value>201 Created XML Response</value></fval>
+	<fval name="start"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='HTTP Status Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx Codes'/>
+				<key type='CircuitContainer'>
+					<id field='name' value='2xx XML Responses'/>
+					<key type='FilterCircuit'>
+						<id field='name' value='201 Created XML Response'/>
+						<key type='SetAttributeFilter'>
+							<id field='name' value='Set New Resource ID'/>
+						</key>
+					</key>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="AddHTTPHeaderFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='2xx Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx XML Responses'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='201 Created XML Response'/>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="addWhere"><value>httpheaders</value></fval>
+	<fval name="base64Encode"><value>0</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="headerName"><value>Location</value></fval>
+	<fval name="headerValue"><value>${location}</value></fval>
+	<fval name="logFailure"><value>Failed in adding the HTTP header to the message</value></fval>
+	<fval name="logFatal"><value>Error in adding the HTTP header to the message. Error: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Success in adding the HTTP header to the message</value></fval>
+	<fval name="name"><value>Add HTTP &quot;Location&quot; Header</value></fval>
+	<fval name="overwriteExistingHeader"><value>1</value></fval>
+	<fval name="successNode"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='HTTP Status Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx Codes'/>
+				<key type='CircuitContainer'>
+					<id field='name' value='2xx XML Responses'/>
+					<key type='FilterCircuit'>
+						<id field='name' value='201 Created XML Response'/>
+						<key type='ChangeMessageFilter'>
+							<id field='name' value='HTTP Status 201 XML Response'/>
+						</key>
+					</key>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="SetAttributeFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='2xx Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx XML Responses'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='201 Created XML Response'/>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="attributeValue"><value>1234</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="logFailure"><value>Failed to set the attribute value</value></fval>
+	<fval name="logFatal"><value>Error while setting the attribute value. Error: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Set the attribute value</value></fval>
+	<fval name="messageAttribute"><value>newResourceID</value></fval>
+	<fval name="name"><value>Set New Resource ID</value></fval>
+	<fval name="successNode"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='HTTP Status Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx Codes'/>
+				<key type='CircuitContainer'>
+					<id field='name' value='2xx XML Responses'/>
+					<key type='FilterCircuit'>
+						<id field='name' value='201 Created XML Response'/>
+						<key type='SetAttributeFilter'>
+							<id field='name' value='Set &quot;Location&quot; Value'/>
+						</key>
+					</key>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="Reflector">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='2xx Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx XML Responses'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='201 Created XML Response'/>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="httpResponseStatus"><value>201</value></fval>
+	<fval name="logFailure"><value>Failed to echo back the message</value></fval>
+	<fval name="logFatal"><value>Error occurred while echoing the message. Error: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Successfully echoed back the message</value></fval>
+	<fval name="name"><value>Reflect Message - HTTP 201</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="ChangeMessageFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='2xx Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx XML Responses'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='201 Created XML Response'/>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="body"><value>&lt;HTTPStatus&gt;&#xD;&#xA;&lt;HTTPStatusCode&gt;201&lt;/HTTPStatusCode&gt;&#xD;&#xA;&lt;HTTPStatusResponse&gt;New Resource created at ${location}&lt;/HTTPStatusResponse&gt;&#xD;&#xA;&lt;/HTTPStatus&gt;</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="logFailure"><value>Failed in setting the message</value></fval>
+	<fval name="logFatal"><value>Error in setting the message. Error: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Success in setting the message</value></fval>
+	<fval name="name"><value>HTTP Status 201 XML Response</value></fval>
+	<fval name="outputContentType"><value>text/xml</value></fval>
+	<fval name="successNode"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='HTTP Status Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx Codes'/>
+				<key type='CircuitContainer'>
+					<id field='name' value='2xx XML Responses'/>
+					<key type='FilterCircuit'>
+						<id field='name' value='201 Created XML Response'/>
+						<key type='Reflector'>
+							<id field='name' value='Reflect Message - HTTP 201'/>
+						</key>
+					</key>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="SetAttributeFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='2xx Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx XML Responses'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='201 Created XML Response'/>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="attributeValue"><value>${http.request.protocol}://${http.request.hostname}:8080${http.request.path}/${newResourceID}</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="logFailure"><value>Failed to set the attribute value</value></fval>
+	<fval name="logFatal"><value>Error while setting the attribute value. Error: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Set the attribute value</value></fval>
+	<fval name="messageAttribute"><value>location</value></fval>
+	<fval name="name"><value>Set &quot;Location&quot; Value</value></fval>
+	<fval name="successNode"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='HTTP Status Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx Codes'/>
+				<key type='CircuitContainer'>
+					<id field='name' value='2xx XML Responses'/>
+					<key type='FilterCircuit'>
+						<id field='name' value='201 Created XML Response'/>
+						<key type='AddHTTPHeaderFilter'>
+							<id field='name' value='Add HTTP &quot;Location&quot; Header'/>
+						</key>
+					</key>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="FilterCircuit">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='2xx Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx XML Responses'/>
+			</key>
+		</key>
+	</key>
+	<fval name="category"><value contentType="reference">
+		<key type='PolicyCategoryGroup'>
+			<id field='name' value='Policy Categories'/>
+			<key type='PolicyCategory'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="description"><value>Succesfull submission for later processing.</value></fval>
+	<fval name="logMask"><value>3</value></fval>
+	<fval name="name"><value>202 Accepted XML Response</value></fval>
+	<fval name="start"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='HTTP Status Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx Codes'/>
+				<key type='CircuitContainer'>
+					<id field='name' value='2xx XML Responses'/>
+					<key type='FilterCircuit'>
+						<id field='name' value='202 Accepted XML Response'/>
+						<key type='SetAttributeFilter'>
+							<id field='name' value='Set Response Content'/>
+						</key>
+					</key>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="Reflector">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='2xx Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx XML Responses'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='202 Accepted XML Response'/>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="httpResponseStatus"><value>202</value></fval>
+	<fval name="logFailure"><value>Failed to echo back the message</value></fval>
+	<fval name="logFatal"><value>Error occurred while echoing the message. Error: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Successfully echoed back the message</value></fval>
+	<fval name="name"><value>Reflect Message - HTTP 202</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="SetAttributeFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='2xx Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx XML Responses'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='202 Accepted XML Response'/>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="attributeValue"><value>ACCEPTED</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="logFailure"><value>Failed to set the attribute value</value></fval>
+	<fval name="logFatal"><value>Error while setting the attribute value. Error: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Set the attribute value</value></fval>
+	<fval name="messageAttribute"><value>responseContent</value></fval>
+	<fval name="name"><value>Set Response Content</value></fval>
+	<fval name="successNode"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='HTTP Status Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx Codes'/>
+				<key type='CircuitContainer'>
+					<id field='name' value='2xx XML Responses'/>
+					<key type='FilterCircuit'>
+						<id field='name' value='202 Accepted XML Response'/>
+						<key type='ChangeMessageFilter'>
+							<id field='name' value='HTTP Status 202 XML Response'/>
+						</key>
+					</key>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="ChangeMessageFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='2xx Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx XML Responses'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='202 Accepted XML Response'/>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="body"><value>&lt;HTTPStatus&gt;&#xD;&#xA;&lt;HTTPStatusCode&gt;202&lt;/HTTPStatusCode&gt;&#xD;&#xA;&lt;HTTPStatusResponse&gt;${responseContent}&lt;/HTTPStatusResponse&gt;&#xD;&#xA;&lt;/HTTPStatus&gt;</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="logFailure"><value>Failed in setting the message</value></fval>
+	<fval name="logFatal"><value>Error in setting the message. Error: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Success in setting the message</value></fval>
+	<fval name="name"><value>HTTP Status 202 XML Response</value></fval>
+	<fval name="outputContentType"><value>text/xml</value></fval>
+	<fval name="successNode"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='HTTP Status Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx Codes'/>
+				<key type='CircuitContainer'>
+					<id field='name' value='2xx XML Responses'/>
+					<key type='FilterCircuit'>
+						<id field='name' value='202 Accepted XML Response'/>
+						<key type='Reflector'>
+							<id field='name' value='Reflect Message - HTTP 202'/>
+						</key>
+					</key>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="CircuitContainer">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='2xx Codes'/>
+		</key>
+	</key>
+	<fval name="name"><value>2xx HTML Responses</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="FilterCircuit">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='2xx Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx HTML Responses'/>
+			</key>
+		</key>
+	</key>
+	<fval name="category"><value contentType="reference">
+		<key type='PolicyCategoryGroup'>
+			<id field='name' value='Policy Categories'/>
+			<key type='PolicyCategory'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="description"><value></value></fval>
+	<fval name="logMask"><value>3</value></fval>
+	<fval name="name"><value>202 Accepted HTML Response</value></fval>
+	<fval name="start"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='HTTP Status Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx Codes'/>
+				<key type='CircuitContainer'>
+					<id field='name' value='2xx HTML Responses'/>
+					<key type='FilterCircuit'>
+						<id field='name' value='202 Accepted HTML Response'/>
+						<key type='ChangeMessageFilter'>
+							<id field='name' value='HTTP Status 202 HTML Response'/>
+						</key>
+					</key>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="ChangeMessageFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='2xx Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx HTML Responses'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='202 Accepted HTML Response'/>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="body"><value>&lt;!DOCTYPE HTML PUBLIC &quot;-//IETF//DTD HTML 2.0//EN&quot;&gt;&#xD;&#xA;&lt;HTML&gt;&lt;HEAD&gt;&#xD;&#xA;&lt;TITLE&gt;202 ACCEPTED&lt;/TITLE&gt;&#xD;&#xA;&lt;/HEAD&gt;&lt;BODY&gt;&#xD;&#xA;&lt;H1&gt;202 - ACCEPTED&lt;/H1&gt;&#xD;&#xA;Your request has been accepted and will be queued for asyncronous operations.&lt;P&gt;&#xD;&#xA;&lt;HR&gt;&#xD;&#xA;&lt;/BODY&gt;&lt;/HTML&gt;</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="logFailure"><value>Failed in setting the message</value></fval>
+	<fval name="logFatal"><value>Error in setting the message. Error: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Success in setting the message</value></fval>
+	<fval name="name"><value>HTTP Status 202 HTML Response</value></fval>
+	<fval name="outputContentType"><value>text/html</value></fval>
+	<fval name="successNode"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='HTTP Status Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx Codes'/>
+				<key type='CircuitContainer'>
+					<id field='name' value='2xx HTML Responses'/>
+					<key type='FilterCircuit'>
+						<id field='name' value='202 Accepted HTML Response'/>
+						<key type='Reflector'>
+							<id field='name' value='Reflect Message - HTTP 202'/>
+						</key>
+					</key>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="Reflector">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='2xx Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx HTML Responses'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='202 Accepted HTML Response'/>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="httpResponseStatus"><value>202</value></fval>
+	<fval name="logFailure"><value>Failed to echo back the message</value></fval>
+	<fval name="logFatal"><value>Error occurred while echoing the message. Error: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>6</value></fval>
+	<fval name="logMaskType"><value>FILTER</value></fval>
+	<fval name="logSuccess"><value>Successfully echoed back the message to IP Address ${http.request.clientaddr}</value></fval>
+	<fval name="name"><value>Reflect Message - HTTP 202</value></fval>
+	<fval name="successNode"><value contentType="reference">-1</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="FilterCircuit">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='2xx Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx HTML Responses'/>
+			</key>
+		</key>
+	</key>
+	<fval name="category"><value contentType="reference">
+		<key type='PolicyCategoryGroup'>
+			<id field='name' value='Policy Categories'/>
+			<key type='PolicyCategory'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="description"><value></value></fval>
+	<fval name="logMask"><value>3</value></fval>
+	<fval name="name"><value>200 OK HTML Response</value></fval>
+	<fval name="start"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='HTTP Status Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx Codes'/>
+				<key type='CircuitContainer'>
+					<id field='name' value='2xx HTML Responses'/>
+					<key type='FilterCircuit'>
+						<id field='name' value='200 OK HTML Response'/>
+						<key type='ChangeMessageFilter'>
+							<id field='name' value='HTTP Status 200 HTMLResponse'/>
+						</key>
+					</key>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="Reflector">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='2xx Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx HTML Responses'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='200 OK HTML Response'/>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="httpResponseStatus"><value>200</value></fval>
+	<fval name="logFailure"><value>Failed to echo back the message</value></fval>
+	<fval name="logFatal"><value>Error occurred while echoing the message. Error: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>6</value></fval>
+	<fval name="logMaskType"><value>FILTER</value></fval>
+	<fval name="logSuccess"><value>Successfully echoed back the message to IP Address ${http.request.clientaddr}</value></fval>
+	<fval name="name"><value>Reflect Message - HTTP 200</value></fval>
+	<fval name="successNode"><value contentType="reference">-1</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="ChangeMessageFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='2xx Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx HTML Responses'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='200 OK HTML Response'/>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="body"><value>&lt;!DOCTYPE HTML PUBLIC &quot;-//IETF//DTD HTML 2.0//EN&quot;&gt;&#xD;&#xA;&lt;HTML&gt;&lt;HEAD&gt;&#xD;&#xA;&lt;TITLE&gt;200 OK&lt;/TITLE&gt;&#xD;&#xA;&lt;/HEAD&gt;&lt;BODY&gt;&#xD;&#xA;&lt;H1&gt;200 - OK &lt;/H1&gt;&#xD;&#xA;Your request has been processed.&lt;P&gt;&#xD;&#xA;&lt;HR&gt;&#xD;&#xA;&lt;/BODY&gt;&lt;/HTML&gt;</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="logFailure"><value>Failed in setting the message</value></fval>
+	<fval name="logFatal"><value>Error in setting the message. Error: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Success in setting the message</value></fval>
+	<fval name="name"><value>HTTP Status 200 HTMLResponse</value></fval>
+	<fval name="outputContentType"><value>text/html</value></fval>
+	<fval name="successNode"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='HTTP Status Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx Codes'/>
+				<key type='CircuitContainer'>
+					<id field='name' value='2xx HTML Responses'/>
+					<key type='FilterCircuit'>
+						<id field='name' value='200 OK HTML Response'/>
+						<key type='Reflector'>
+							<id field='name' value='Reflect Message - HTTP 200'/>
+						</key>
+					</key>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="FilterCircuit">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='2xx Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx HTML Responses'/>
+			</key>
+		</key>
+	</key>
+	<fval name="category"><value contentType="reference">
+		<key type='PolicyCategoryGroup'>
+			<id field='name' value='Policy Categories'/>
+			<key type='PolicyCategory'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="description"><value>Sucessful operation with new resource creation.</value></fval>
+	<fval name="logMask"><value>3</value></fval>
+	<fval name="name"><value>201 Created HTML Response</value></fval>
+	<fval name="start"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='HTTP Status Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx Codes'/>
+				<key type='CircuitContainer'>
+					<id field='name' value='2xx HTML Responses'/>
+					<key type='FilterCircuit'>
+						<id field='name' value='201 Created HTML Response'/>
+						<key type='SetAttributeFilter'>
+							<id field='name' value='Set New Resource ID'/>
+						</key>
+					</key>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="AddHTTPHeaderFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='2xx Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx HTML Responses'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='201 Created HTML Response'/>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="addWhere"><value>httpheaders</value></fval>
+	<fval name="base64Encode"><value>0</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="headerName"><value>Location</value></fval>
+	<fval name="headerValue"><value>${location}</value></fval>
+	<fval name="logFailure"><value>Failed in adding the HTTP header to the message</value></fval>
+	<fval name="logFatal"><value>Error in adding the HTTP header to the message. Error: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Success in adding the HTTP header to the message</value></fval>
+	<fval name="name"><value>Add HTTP &quot;Location&quot; Header</value></fval>
+	<fval name="overwriteExistingHeader"><value>1</value></fval>
+	<fval name="successNode"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='HTTP Status Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx Codes'/>
+				<key type='CircuitContainer'>
+					<id field='name' value='2xx HTML Responses'/>
+					<key type='FilterCircuit'>
+						<id field='name' value='201 Created HTML Response'/>
+						<key type='ChangeMessageFilter'>
+							<id field='name' value='HTTP Status 201 HTML Response'/>
+						</key>
+					</key>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="Reflector">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='2xx Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx HTML Responses'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='201 Created HTML Response'/>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="httpResponseStatus"><value>201</value></fval>
+	<fval name="logFailure"><value>Failed to echo back the message</value></fval>
+	<fval name="logFatal"><value>Error occurred while echoing the message. Error: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Successfully echoed back the message</value></fval>
+	<fval name="name"><value>Reflect Message - HTTP 201</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="SetAttributeFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='2xx Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx HTML Responses'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='201 Created HTML Response'/>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="attributeValue"><value>1234</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="logFailure"><value>Failed to set the attribute value</value></fval>
+	<fval name="logFatal"><value>Error while setting the attribute value. Error: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Set the attribute value</value></fval>
+	<fval name="messageAttribute"><value>newResourceID</value></fval>
+	<fval name="name"><value>Set New Resource ID</value></fval>
+	<fval name="successNode"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='HTTP Status Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx Codes'/>
+				<key type='CircuitContainer'>
+					<id field='name' value='2xx HTML Responses'/>
+					<key type='FilterCircuit'>
+						<id field='name' value='201 Created HTML Response'/>
+						<key type='SetAttributeFilter'>
+							<id field='name' value='Set &quot;Location&quot; Value'/>
+						</key>
+					</key>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="SetAttributeFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='2xx Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx HTML Responses'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='201 Created HTML Response'/>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="attributeValue"><value>${http.request.protocol}://${http.request.hostname}:8080${http.request.path}/${newResourceID}</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="logFailure"><value>Failed to set the attribute value</value></fval>
+	<fval name="logFatal"><value>Error while setting the attribute value. Error: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Set the attribute value</value></fval>
+	<fval name="messageAttribute"><value>location</value></fval>
+	<fval name="name"><value>Set &quot;Location&quot; Value</value></fval>
+	<fval name="successNode"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='HTTP Status Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx Codes'/>
+				<key type='CircuitContainer'>
+					<id field='name' value='2xx HTML Responses'/>
+					<key type='FilterCircuit'>
+						<id field='name' value='201 Created HTML Response'/>
+						<key type='AddHTTPHeaderFilter'>
+							<id field='name' value='Add HTTP &quot;Location&quot; Header'/>
+						</key>
+					</key>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="ChangeMessageFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='2xx Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx HTML Responses'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='201 Created HTML Response'/>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="body"><value>&lt;!DOCTYPE HTML PUBLIC &quot;-//IETF//DTD HTML 2.0//EN&quot;&gt;&#xD;&#xA;&lt;HTML&gt;&lt;HEAD&gt;&#xD;&#xA;&lt;TITLE&gt;201 CREATED&lt;/TITLE&gt;&#xD;&#xA;&lt;/HEAD&gt;&lt;BODY&gt;&#xD;&#xA;&lt;H1&gt;201 - CREATED&lt;/H1&gt;&#xD;&#xA;New Resource created at ${location}.&lt;P&gt;&#xD;&#xA;&lt;HR&gt;&#xD;&#xA;&lt;/BODY&gt;&lt;/HTML&gt;</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="logFailure"><value>Failed in setting the message</value></fval>
+	<fval name="logFatal"><value>Error in setting the message. Error: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Success in setting the message</value></fval>
+	<fval name="name"><value>HTTP Status 201 HTML Response</value></fval>
+	<fval name="outputContentType"><value>text/html</value></fval>
+	<fval name="successNode"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='HTTP Status Codes'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='2xx Codes'/>
+				<key type='CircuitContainer'>
+					<id field='name' value='2xx HTML Responses'/>
+					<key type='FilterCircuit'>
+						<id field='name' value='201 Created HTML Response'/>
+						<key type='Reflector'>
+							<id field='name' value='Reflect Message - HTTP 201'/>
+						</key>
+					</key>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="ESConfiguration">
+	<fval name="name"><value>Entity Store Configuration</value></fval>
+	<fval name="passphraseTest"><value>aHR0cDsvL3d3dy52b3JkZWwuY29t</value></fval>
+	<fval name="productKey"><value>VordelGateway</value></fval>
+	<fval name="version"><value>7.5.3</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="CircuitContainer">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+	</key>
+	<fval name="name"><value>5xx Codes</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="CircuitContainer">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='5xx Codes'/>
+		</key>
+	</key>
+	<fval name="name"><value>5xx HTML Responses</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="CircuitContainer">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='5xx Codes'/>
+		</key>
+	</key>
+	<fval name="name"><value>5xx XML Responses</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="CircuitContainer">
+	<key type='CircuitContainer'>
+		<id field='name' value='HTTP Status Codes'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='5xx Codes'/>
+		</key>
+	</key>
+	<fval name="name"><value>5xx JSON Responses</value></fval>
+</entity>
+</entityStoreData>
