@@ -1,4 +1,4 @@
-# HTTP_StatusCodes_200_Series
+# HTTP_StatusCodes_Series
 WIP Project to add HTTP Status Code policy samples and insight on their use.
 Learn more at: http://danielwille.blogspot.com/2018/04/rest-api-best-practices-http-status.html
 
